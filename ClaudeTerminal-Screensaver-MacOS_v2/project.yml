@@ -1,0 +1,16 @@
+name: ClaudeTermSaverV2
+options:
+  bundleIdPrefix: com.yourname
+targets:
+  ClaudeTermSaverV2:
+    type: bundle
+    platform: macOS
+    deploymentTarget: "11.0"
+    sources:
+      - path: NativeScreenSaverView.swift
+      - path: ClaudeCLIView.swift
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.yourname.ClaudeTermSaverV2
+      WRAPPER_EXTENSION: saver
+      PRINCIPAL_CLASS: ClaudeTermSaverV2.NativeScreenSaverView
+      GENERATE_INFOPLIST_FILE: YES
