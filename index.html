@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude CLI Mock-up</title>
+    <style>
+        body {
+            background-color: #0f1016;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .terminal-window {
+            width: 640px;
+            background: #11111b;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            border: 1px solid #313244;
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            background: #181825;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #313244;
+            position: relative;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .control {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .close { background-color: #ff5f56; }
+        .minimize { background-color: #ffbd2e; }
+        .expand { background-color: #27c93f; }
+
+        .window-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #a6adc8;
+            font-size: 13px;
+            font-family: monospace;
+        }
+
+        .terminal-body {
+            padding: 24px;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            color: #cdd6f4;
+        }
+
+        .command-line {
+            margin-bottom: 16px;
+        }
+
+        .prompt-symbol {
+            color: #89b4fa;
+            font-weight: bold;
+        }
+
+        .status-box {
+            background: #181825;
+            border: 1px solid #313244;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .status-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 10px;
+        }
+
+        /* Spinner Animation */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(245, 158, 11, 0.2);
+            border-top-color: #f59e0b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-title {
+            color: #fab387;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .status-desc {
+            color: #6c7086;
+            font-size: 12px;
+            margin-left: 34px;
+            margin-bottom: 16px;
+        }
+
+        .progress-track {
+            background: #313244;
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-left: 34px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #d97706, #f59e0b);
+            height: 100%;
+            width: 65%;
+            border-radius: 3px;
+            animation: pulse-bar 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse-bar {
+            0% { width: 40%; }
+            100% { width: 85%; }
+        }
+
+        .status-footer {
+            margin-top: 14px;
+            margin-left: 34px;
+            font-size: 11px;
+            color: #a6adc8;
+        }
+
+        .interactive-prompt {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #f59e0b;
+        }
+
+        .cursor {
+            width: 8px;
+            height: 15px;
+            background-color: #f59e0b;
+            animation: blink 1s step-start infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="terminal-window">
+        <div class="terminal-header">
+            <div class="window-controls">
+                <div class="control close"></div>
+                <div class="control minimize"></div>
+                <div class="control expand"></div>
+            </div>
+            <div class="window-title">claude-cli — zsh</div>
+        </div>
+        
+        <div class="terminal-body">
+            <div class="command-line">
+                <span style="color: #6c7086;">~/projects/workspace (main)</span><br>
+                <span class="prompt-symbol">$</span> claude --status-mode caramelise
+            </div>
+
+            <div class="status-box">
+                <div class="status-header">
+                    <div class="spinner"></div>
+                    <div class="status-title" id="status-text">Claude is caramelising your query...</div>
+                </div>
+                <div class="status-desc">Slow-cooking the logic until golden brown and full of rich flavor.</div>
+                <div class="progress-track">
+                    <div class="progress-fill"></div>
+                </div>
+                <div class="status-footer">
+                    <span style="color: #f38ba8;">ℹ</span> Press <span style="color: #94e2d5;">Esc</span> to toggle verbosity or <span style="color: #94e2d5;">Ctrl+C</span> to cancel.
+                </div>
+            </div>
+
+            <div class="interactive-prompt">
+                <span>❯</span>
+                <div class="cursor"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fun array of cute statuses to rotate through dynamically!
+        const statuses = [
+            { title: "Claude is caramelising your query...", desc: "Slow-cooking the logic until golden brown and rich." },
+            { title: "Claude is combobulating the context...", desc: "Putting things back together in a much better order." },
+            { title: "Claude is gently seasoning the output...", desc: "Adding just the right amount of syntax sugar." },
+            { title: "Claude is wrangling the syntax...", desc: "Herding stray brackets back into formation." }
+        ];
+
+        let index = 0;
+        setInterval(() => {
+            index = (index + 1) % statuses.length;
+            document.getElementById('status-text').textContent = statuses[index].title;
+            document.querySelector('.status-desc').textContent = statuses[index].desc;
+        }, 4500);
+    </script>
+</body>
+</html>

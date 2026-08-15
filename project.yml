@@ -1,0 +1,17 @@
+name: ClaudeTermSaver
+options:
+  bundleIdPrefix: com.yourname
+targets:
+  ClaudeTermSaver:
+    type: bundle
+    platform: macOS
+    deploymentTarget: "11.0"
+    sources:
+      - path: WebViewScreenSaverView.swift
+      - path: index.html
+        buildPhase: resources
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.yourname.ClaudeTermSaver
+      WRAPPER_EXTENSION: saver
+      PRINCIPAL_CLASS: ClaudeTermSaver.WebViewScreenSaverView
+      GENERATE_INFOPLIST_FILE: YES
