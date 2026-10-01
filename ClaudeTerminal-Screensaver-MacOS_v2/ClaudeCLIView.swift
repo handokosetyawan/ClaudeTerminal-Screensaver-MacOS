@@ -1,12 +1,64 @@
 import SwiftUI
 
+/// Drives all animation from a single low-frequency timer so the screen saver
+/// stays cheap and can be fully paused by startAnimation()/stopAnimation().
+final class ScreenSaverState: ObservableObject {
+    static let tickInterval: TimeInterval = 0.1   // 10 Hz
+    static let statusCount = ClaudeCLIView.statuses.count
+
+    @Published var rotationDegrees: Double = 0
+    @Published var pulseWidth: CGFloat = 0.4
+    @Published var blink = false
+    @Published var statusIndex = 0
+
+    private var timer: Timer?
+    private var tick = 0
+
+    func start() {
+        guard timer == nil else { return }
+        let timer = Timer(timeInterval: Self.tickInterval, repeats: true) { [weak self] _ in
+            self?.advance()
+        }
+        timer.tolerance = Self.tickInterval / 2
+        RunLoop.main.add(timer, forMode: .common)
+        self.timer = timer
+    }
+
+    func stop() {
+        timer?.invalidate()
+        timer = nil
+    }
+
+    deinit {
+        timer?.invalidate()
+    }
+
+    private func advance() {
+        tick += 1
+
+        // Spinner: one revolution per second.
+        rotationDegrees = Double(tick % 10) * 36
+
+        // Progress bar: ease between 0.4 and 0.85 over a 4s round trip.
+        let phase = Double(tick % 40) / 40 * 2 * .pi
+        pulseWidth = CGFloat(0.625 - 0.225 * cos(phase))
+
+        // Cursor: toggle every 0.5s.
+        if tick % 5 == 0 {
+            blink.toggle()
+        }
+
+        // Status line: rotate every 4.5s.
+        if tick % 45 == 0 {
+            statusIndex = (statusIndex + 1) % Self.statusCount
+        }
+    }
+}
+
 struct ClaudeCLIView: View {
-    @State private var statusIndex = 0
-    @State private var pulseWidth: CGFloat = 0.4
-    @State private var blink = false
-    @State private var isSpinning = false
-    
-    let statuses = [
+    @ObservedObject var state: ScreenSaverState
+
+    static let statuses = [
         ("Claude is caramelising your query...", "Slow-cooking the logic until golden brown and rich."),
         ("Claude is combobulating the context...", "Putting things back together in a much better order."),
         ("Claude is gently seasoning the output...", "Adding just the right amount of syntax sugar."),
@@ -63,15 +115,14 @@ struct ClaudeCLIView: View {
                                 .trim(from: 0.2, to: 1.0)
                                 .stroke(Color(red: 245/255, green: 158/255, blue: 11/255), lineWidth: 3)
                                 .frame(width: 20, height: 20)
-                                .rotationEffect(Angle(degrees: isSpinning ? 360 : 0))
-                                .animation(Animation.linear(duration: 1).repeatForever(autoreverses: false), value: isSpinning)
-                            
-                            Text(statuses[statusIndex].0)
+                                .rotationEffect(Angle(degrees: state.rotationDegrees))
+
+                            Text(Self.statuses[state.statusIndex].0)
                                 .foregroundColor(Color(red: 250/255, green: 179/255, blue: 135/255))
                                 .bold()
                         }
                         
-                        Text(statuses[statusIndex].1)
+                        Text(Self.statuses[state.statusIndex].1)
                             .foregroundColor(Color(red: 108/255, green: 112/255, blue: 134/255))
                             .font(.system(size: 12, weight: .regular, design: .monospaced))
                             .padding(.leading, 34)
@@ -85,7 +136,7 @@ struct ClaudeCLIView: View {
                                 
                                 RoundedRectangle(cornerRadius: 3)
                                     .fill(LinearGradient(gradient: Gradient(colors: [Color(red: 217/255, green: 119/255, blue: 6/255), Color(red: 245/255, green: 158/255, blue: 11/255)]), startPoint: .leading, endPoint: .trailing))
-                                    .frame(width: geo.size.width * pulseWidth, height: 6)
+                                    .frame(width: geo.size.width * state.pulseWidth, height: 6)
                             }
                         }
                         .frame(height: 6)
@@ -108,7 +159,7 @@ struct ClaudeCLIView: View {
                         Rectangle()
                             .fill(Color(red: 245/255, green: 158/255, blue: 11/255))
                             .frame(width: 8, height: 15)
-                            .opacity(blink ? 1 : 0)
+                            .opacity(state.blink ? 1 : 0)
                     }
                     .font(.system(size: 13, weight: .regular, design: .monospaced))
                     
@@ -122,21 +173,6 @@ struct ClaudeCLIView: View {
             .cornerRadius(12)
             .overlay(RoundedRectangle(cornerRadius: 12).stroke(borderColor, lineWidth: 1))
             .shadow(color: Color.black.opacity(0.7), radius: 25, x: 0, y: 12)
-        }
-        .onAppear {
-            isSpinning = true
-            
-            withAnimation(Animation.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
-                pulseWidth = 0.85
-            }
-            
-            Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
-                blink.toggle()
-            }
-            
-            Timer.scheduledTimer(withTimeInterval: 4.5, repeats: true) { _ in
-                statusIndex = (statusIndex + 1) % statuses.count
-            }
         }
     }
 }
