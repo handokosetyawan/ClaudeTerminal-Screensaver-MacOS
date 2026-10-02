@@ -12,5 +12,5 @@ targets:
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.yourname.ClaudeTermSaverV2
       WRAPPER_EXTENSION: saver
-      PRINCIPAL_CLASS: ClaudeTermSaverV2.NativeScreenSaverView
+      INFOPLIST_KEY_NSPrincipalClass: ClaudeTermSaverV2.NativeScreenSaverView
       GENERATE_INFOPLIST_FILE: YES

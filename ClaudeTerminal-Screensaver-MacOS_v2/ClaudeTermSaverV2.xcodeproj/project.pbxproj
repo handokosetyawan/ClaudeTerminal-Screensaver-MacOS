@@ -108,7 +108,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				PRINCIPAL_CLASS = ClaudeTermSaverV2.NativeScreenSaverView;
+				INFOPLIST_KEY_NSPrincipalClass = ClaudeTermSaverV2.NativeScreenSaverView;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourname.ClaudeTermSaverV2;
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = saver;
@@ -242,7 +242,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 12.0;
-				PRINCIPAL_CLASS = ClaudeTermSaverV2.NativeScreenSaverView;
+				INFOPLIST_KEY_NSPrincipalClass = ClaudeTermSaverV2.NativeScreenSaverView;
 				PRODUCT_BUNDLE_IDENTIFIER = com.yourname.ClaudeTermSaverV2;
 				SDKROOT = macosx;
 				WRAPPER_EXTENSION = saver;
